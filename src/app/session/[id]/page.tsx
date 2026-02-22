@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useCamera } from "@/hooks/useCamera";
 import "./session.css";
@@ -20,7 +20,7 @@ export default function SessionPage() {
     uploadPhoto,
     cropImage,
     isCameraActive,
-    error: cameraError // Ini adalah error dari useCamera
+    error: cameraError
   } = useCamera();
 
   const [captured, setCaptured] = useState<string | null>(null);
@@ -40,24 +40,28 @@ export default function SessionPage() {
   const cropAreaRef = useRef<HTMLDivElement>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Effect untuk start camera
+  // Memoized function untuk start camera dengan error handling
+  const initCamera = useCallback(async () => {
+    if (uploadMode || isStartingCamera) return;
+    
+    try {
+      setIsStartingCamera(true);
+      await startCamera();
+    } catch (err) {
+      console.error('Failed to start camera:', err);
+      setUploadMode(true);
+    } finally {
+      setIsStartingCamera(false);
+    }
+  }, [uploadMode, startCamera, isStartingCamera]);
+
+  // Effect untuk camera initialization
   useEffect(() => {
     let mounted = true;
     
-    const initCamera = async () => {
-      if (!uploadMode && mounted) {
-        setIsStartingCamera(true);
-        try {
-          await startCamera();
-        } catch (err) {
-          console.error('Failed to start camera:', err);
-        } finally {
-          setIsStartingCamera(false);
-        }
-      }
-    };
-    
-    initCamera();
+    if (!uploadMode && mounted) {
+      initCamera();
+    }
     
     return () => {
       mounted = false;
@@ -67,7 +71,7 @@ export default function SessionPage() {
         countdownRef.current = null;
       }
     };
-  }, [uploadMode, startCamera, stopCamera]);
+  }, [uploadMode, initCamera, stopCamera]);
 
   const startCountdown = () => {
     if (isCapturing) return;

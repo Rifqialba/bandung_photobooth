@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.6.1",
     "canvas-confetti": "^1.9.4",
     "framer-motion": "^12.34.2",
     "next": "16.1.6",
