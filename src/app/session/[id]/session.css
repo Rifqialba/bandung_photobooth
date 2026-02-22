@@ -1,0 +1,778 @@
+/* Variables retro theme */
+:root {
+  --retro-cream: #f4ecd8;
+  --retro-dark: #2b2b2b;
+  --retro-brown: #8b7e6b;
+  --retro-gold: #c9a227;
+  --retro-red: #b34a4a;
+  --retro-paper: #faf0e6;
+  --retro-shadow: rgba(0, 0, 0, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.session-wrapper {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, var(--retro-cream) 0%, #e8ddc8 100%);
+  padding: 10px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Background pattern */
+.session-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 30 L30 35 L35 35 L35 30 Z' fill='%238b7e6b' fill-opacity='0.1'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.session-card {
+  background: var(--retro-paper);
+  padding: 15px 20px;
+  border: 4px solid var(--retro-dark);
+  box-shadow: 8px 8px 0 var(--retro-brown);
+  width: 95%;
+  max-width: 1000px;
+  height: 90vh;
+  max-height: 700px;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  animation: cardAppear 0.5s ease;
+  overflow: hidden;
+}
+
+/* Retro Tape */
+.retro-tape {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(2px);
+  padding: 4px 20px;
+  font-family: "Special Elite", cursive;
+  font-size: 12px;
+  color: var(--retro-dark);
+  border: 2px dashed var(--retro-brown);
+  letter-spacing: 1px;
+  box-shadow: 0 3px 0 var(--retro-brown);
+  z-index: 10;
+  white-space: nowrap;
+}
+
+/* Header Section */
+.session-header {
+  flex: 0 0 auto;
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.session-counter {
+  font-family: "Special Elite", cursive;
+  font-size: 12px;
+  color: var(--retro-brown);
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.session-title {
+  font-family: "Special Elite", cursive;
+  font-size: 32px;
+  color: var(--retro-dark);
+  margin: 0;
+  text-shadow: 2px 2px 0 var(--retro-brown);
+  letter-spacing: 2px;
+  display: inline-block;
+  padding: 0 15px;
+  line-height: 1.2;
+}
+
+.session-title::before,
+.session-title::after {
+  content: "✦";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--retro-gold);
+  font-size: 20px;
+}
+
+.session-title::before {
+  left: -10px;
+}
+.session-title::after {
+  right: -10px;
+}
+
+/* Mode Toggle */
+.mode-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 8px 0;
+  flex: 0 0 auto;
+}
+
+.mode-btn {
+  background: transparent;
+  border: 2px solid var(--retro-brown);
+  color: var(--retro-brown);
+  font-family: "Special Elite", cursive;
+  font-size: 12px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-btn.active {
+  background: var(--retro-dark);
+  color: var(--retro-cream);
+  border-color: var(--retro-dark);
+  box-shadow: 2px 2px 0 var(--retro-gold);
+}
+
+/* Instructions Panel */
+.instructions-panel {
+  background: rgba(244, 236, 216, 0.8);
+  backdrop-filter: blur(5px);
+  border: 2px solid var(--retro-dark);
+  padding: 6px 15px;
+  margin: 5px auto 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Special Elite", cursive;
+  font-size: 12px;
+  color: var(--retro-dark);
+  box-shadow: 3px 3px 0 var(--retro-brown);
+  flex: 0 0 auto;
+}
+
+/* Error Message */
+.error-message {
+  background: var(--retro-red);
+  color: white;
+  font-family: "Special Elite", cursive;
+  padding: 6px 12px;
+  margin: 5px 0;
+  border: 2px solid var(--retro-dark);
+  box-shadow: 2px 2px 0 var(--retro-brown);
+  font-size: 12px;
+  text-align: center;
+  flex: 0 0 auto;
+}
+
+/* Camera Container */
+.camera-container {
+  flex: 1 1 auto;
+  position: relative;
+  margin: 5px 0;
+  border: 4px solid var(--retro-dark);
+  box-shadow: 5px 5px 0 var(--retro-brown);
+  background: #1a1a1a;
+  overflow: hidden;
+  min-height: 0;
+  max-height: 50vh;
+}
+
+.camera-container video,
+.camera-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+/* Viewfinder corners */
+.viewfinder-corner {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  z-index: 4;
+}
+
+.top-left {
+  top: 5px;
+  left: 5px;
+  border-right: none;
+  border-bottom: none;
+}
+.top-right {
+  top: 5px;
+  right: 5px;
+  border-left: none;
+  border-bottom: none;
+}
+.bottom-left {
+  bottom: 5px;
+  left: 5px;
+  border-right: none;
+  border-top: none;
+}
+.bottom-right {
+  bottom: 5px;
+  right: 5px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Camera frame */
+.camera-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Flash effect */
+.flash-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+  animation: flash 0.3s ease;
+}
+
+/* Countdown */
+.countdown-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.countdown-number {
+  font-family: "Special Elite", cursive;
+  font-size: 60px;
+  color: white;
+  text-shadow: 3px 3px 0 var(--retro-dark);
+  animation: countdownPop 1s infinite;
+}
+
+/* Upload Container */
+.upload-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 10px;
+}
+
+.upload-box {
+  background: rgba(255, 255, 255, 0.5);
+  border: 3px dashed var(--retro-brown);
+  padding: 20px;
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 10px;
+  animation: bounce 2s infinite;
+}
+
+.upload-title {
+  font-family: "Special Elite", cursive;
+  font-size: 20px;
+  color: var(--retro-dark);
+  margin-bottom: 8px;
+}
+
+.upload-text {
+  font-family: "Special Elite", cursive;
+  font-size: 12px;
+  color: var(--retro-brown);
+  margin-bottom: 10px;
+}
+
+.upload-hint {
+  font-family: "Special Elite", cursive;
+  font-size: 11px;
+  color: var(--retro-gold);
+  margin-bottom: 15px;
+}
+
+/* Crop Container */
+.crop-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 10px;
+}
+
+.crop-area {
+  flex: 1;
+  position: relative;
+  background: #000;
+  border: 3px solid var(--retro-dark);
+  margin-bottom: 10px;
+  min-height: 0;
+  max-height: 40vh;
+  overflow: hidden;
+}
+
+.crop-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.crop-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Action Area */
+.action-area {
+  flex: 0 0 auto;
+  margin: 10px 0 5px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Retro Buttons */
+.retro-btn {
+  background: var(--retro-dark);
+  color: var(--retro-cream);
+  border: none;
+  padding: 8px 20px;
+  font-family: "Special Elite", cursive;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--retro-brown);
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.retro-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 0 var(--retro-brown);
+}
+
+.retro-btn:active {
+  transform: translateY(1px);
+  box-shadow: 2px 2px 0 var(--retro-brown);
+}
+
+.retro-btn.secondary {
+  background: var(--retro-cream);
+  color: var(--retro-dark);
+  border: 2px solid var(--retro-dark);
+  box-shadow: 3px 3px 0 var(--retro-gold);
+}
+
+.retro-btn.small {
+  padding: 5px 15px;
+  font-size: 12px;
+  min-width: 80px;
+}
+
+/* Film Strip */
+.film-strip {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 5px;
+  flex: 0 0 auto;
+}
+
+.film-strip span {
+  width: 8px;
+  height: 8px;
+  background: var(--retro-gold);
+  border-radius: 50%;
+  animation: filmRoll 3s infinite linear;
+}
+
+/* Retro Caption */
+.retro-caption {
+  font-family: "Special Elite", cursive;
+  color: var(--retro-brown);
+  margin-top: 5px;
+  font-size: 11px;
+  text-align: center;
+  flex: 0 0 auto;
+}
+
+/* Hidden canvas for capture */
+.hidden-canvas {
+  display: none;
+}
+
+/* Animations */
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes countdownPop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes filmRoll {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(30px);
+  }
+  100% {
+    transform: translateX(60px);
+  }
+}
+
+/* Responsive Breakpoints */
+
+/* Large Desktop */
+@media (min-width: 1200px) {
+  .session-card {
+    max-width: 1100px;
+    max-height: 750px;
+  }
+
+  .session-title {
+    font-size: 36px;
+  }
+  .camera-container {
+    max-height: 55vh;
+  }
+}
+
+/* Desktop */
+@media (max-width: 1024px) {
+  .session-card {
+    width: 95%;
+    height: 85vh;
+  }
+
+  .session-title {
+    font-size: 32px;
+  }
+}
+
+/* Tablet Landscape */
+@media (max-width: 900px) and (orientation: landscape) {
+  .session-card {
+    height: 90vh;
+    padding: 10px 15px;
+  }
+
+  .session-title {
+    font-size: 28px;
+  }
+  .camera-container {
+    max-height: 50vh;
+  }
+  .retro-btn {
+    padding: 6px 15px;
+    font-size: 13px;
+  }
+}
+
+/* Tablet Portrait */
+@media (max-width: 768px) {
+  .session-card {
+    height: 92vh;
+    padding: 10px;
+  }
+
+  .session-title {
+    font-size: 28px;
+  }
+  .session-title::before,
+  .session-title::after {
+    font-size: 18px;
+  }
+
+  .mode-toggle {
+    gap: 5px;
+  }
+  .mode-btn {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .instructions-panel {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+
+  .camera-container {
+    max-height: 45vh;
+  }
+
+  .retro-btn {
+    padding: 6px 15px;
+    font-size: 13px;
+    min-width: 100px;
+  }
+
+  .countdown-number {
+    font-size: 50px;
+  }
+}
+
+/* Mobile Landscape */
+@media (max-width: 700px) and (orientation: landscape) {
+  .session-card {
+    height: 95vh;
+    padding: 8px;
+  }
+
+  .session-title {
+    font-size: 24px;
+  }
+  .camera-container {
+    max-height: 40vh;
+  }
+
+  .retro-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+    min-width: 90px;
+  }
+
+  .upload-icon {
+    font-size: 40px;
+  }
+  .upload-title {
+    font-size: 18px;
+  }
+}
+
+/* Mobile Portrait */
+@media (max-width: 480px) {
+  .session-wrapper {
+    padding: 5px;
+  }
+
+  .session-card {
+    height: 98vh;
+    padding: 8px 10px;
+  }
+
+  .retro-tape {
+    font-size: 10px;
+    padding: 3px 15px;
+    top: -8px;
+  }
+
+  .session-counter {
+    font-size: 10px;
+  }
+
+  .session-title {
+    font-size: 24px;
+    padding: 0 12px;
+  }
+
+  .session-title::before,
+  .session-title::after {
+    font-size: 16px;
+  }
+
+  .mode-toggle {
+    flex-direction: column;
+    gap: 3px;
+  }
+  .mode-btn {
+    width: 100%;
+    font-size: 11px;
+  }
+
+  .instructions-panel {
+    font-size: 10px;
+    padding: 4px 8px;
+    flex-wrap: wrap;
+  }
+
+  .camera-container {
+    max-height: 35vh;
+    border-width: 3px;
+    box-shadow: 4px 4px 0 var(--retro-brown);
+  }
+
+  .viewfinder-corner {
+    width: 12px;
+    height: 12px;
+    border-width: 1.5px;
+  }
+
+  .action-area {
+    margin: 8px 0;
+  }
+
+  .retro-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+    min-width: 90px;
+  }
+
+  .preview-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .preview-actions .retro-btn {
+    width: 100%;
+  }
+
+  .countdown-number {
+    font-size: 40px;
+  }
+
+  .upload-box {
+    padding: 15px;
+  }
+  .upload-icon {
+    font-size: 40px;
+  }
+  .upload-title {
+    font-size: 16px;
+  }
+  .upload-text {
+    font-size: 11px;
+  }
+
+  .film-strip span {
+    width: 6px;
+    height: 6px;
+  }
+
+  .retro-caption {
+    font-size: 10px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 360px) {
+  .session-title {
+    font-size: 20px;
+  }
+  .camera-container {
+    max-height: 30vh;
+  }
+
+  .retro-btn {
+    padding: 4px 10px;
+    font-size: 11px;
+    min-width: 80px;
+  }
+
+  .countdown-number {
+    font-size: 35px;
+  }
+}
+
+/* Handle very short heights */
+@media (max-height: 600px) {
+  .session-card {
+    height: 98vh;
+  }
+  .session-title {
+    font-size: 24px;
+    margin-bottom: 2px;
+  }
+  .camera-container {
+    max-height: 45vh;
+  }
+  .retro-btn {
+    padding: 4px 10px;
+  }
+}
+
+/* Handle very tall screens */
+@media (min-height: 1000px) {
+  .session-card {
+    max-height: 800px;
+  }
+  .camera-container {
+    max-height: 50vh;
+  }
+}
