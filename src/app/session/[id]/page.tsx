@@ -20,7 +20,7 @@ export default function SessionPage() {
     uploadPhoto,
     cropImage,
     isCameraActive,
-    error
+    error: cameraError // Ini adalah error dari useCamera
   } = useCamera();
 
   const [captured, setCaptured] = useState<string | null>(null);
@@ -34,10 +34,11 @@ export default function SessionPage() {
   const [cropStart, setCropStart] = useState<{ x: number; y: number } | null>(null);
   const [cropEnd, setCropEnd] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isStartingCamera, setIsStartingCamera] = useState(false);
   
   const imageRef = useRef<HTMLImageElement>(null);
   const cropAreaRef = useRef<HTMLDivElement>(null);
-  const countdownRef = useRef<NodeJS.Timeout>();
+  const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
   // Effect untuk start camera
   useEffect(() => {
@@ -45,7 +46,14 @@ export default function SessionPage() {
     
     const initCamera = async () => {
       if (!uploadMode && mounted) {
-        await startCamera();
+        setIsStartingCamera(true);
+        try {
+          await startCamera();
+        } catch (err) {
+          console.error('Failed to start camera:', err);
+        } finally {
+          setIsStartingCamera(false);
+        }
       }
     };
     
@@ -56,6 +64,7 @@ export default function SessionPage() {
       stopCamera();
       if (countdownRef.current) {
         clearInterval(countdownRef.current);
+        countdownRef.current = null;
       }
     };
   }, [uploadMode, startCamera, stopCamera]);
@@ -66,16 +75,18 @@ export default function SessionPage() {
     setIsCapturing(true);
     setCountdown(3);
     
-    countdownRef.current = setInterval(() => {
+    const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev === 1) {
-          clearInterval(countdownRef.current);
+          clearInterval(timer);
           handleCapture();
           return null;
         }
         return prev ? prev - 1 : null;
       });
     }, 1000);
+    
+    countdownRef.current = timer;
   };
 
   const handleCapture = () => {
@@ -131,7 +142,6 @@ export default function SessionPage() {
     let x = clientX - rect.left;
     let y = clientY - rect.top;
     
-    // Constrain to area
     x = Math.max(0, Math.min(rect.width, x));
     y = Math.max(0, Math.min(rect.height, y));
     
@@ -147,7 +157,6 @@ export default function SessionPage() {
 
     const imageRect = imageRef.current.getBoundingClientRect();
     
-    // Calculate crop area relative to image
     const scaleX = imageRef.current.naturalWidth / imageRect.width;
     const scaleY = imageRef.current.naturalHeight / imageRect.height;
 
@@ -156,7 +165,6 @@ export default function SessionPage() {
     const cropWidth = Math.abs(cropEnd.x - cropStart.x);
     const cropHeight = Math.abs(cropEnd.y - cropStart.y);
 
-    // Minimum crop size
     if (cropWidth < 50 || cropHeight < 50) {
       setUploadError('Please select a larger area');
       return;
@@ -183,11 +191,9 @@ export default function SessionPage() {
     setCropEnd(null);
   };
 
-  // FIXED: Fungsi retake yang benar
   const handleRetake = () => {
     console.log("Retake clicked, current mode:", uploadMode ? "upload" : "camera");
     
-    // Reset semua state
     setCaptured(null);
     setIsCapturing(false);
     setCountdown(null);
@@ -197,10 +203,8 @@ export default function SessionPage() {
     setCropStart(null);
     setCropEnd(null);
     
-    // Small delay to ensure state updates
     setTimeout(() => {
       if (!uploadMode && !isCameraActive) {
-        // If in camera mode and camera is not active, restart it
         startCamera();
       }
     }, 100);
@@ -222,13 +226,13 @@ export default function SessionPage() {
   const handleCancelCountdown = () => {
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
+      countdownRef.current = null;
     }
     setCountdown(null);
     setIsCapturing(false);
   };
 
   const toggleMode = () => {
-    // Reset semua state saat ganti mode
     setCaptured(null);
     setUploadError(null);
     setTempImage(null);
@@ -236,12 +240,15 @@ export default function SessionPage() {
     setCropStart(null);
     setCropEnd(null);
     
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+    
     if (!uploadMode) {
-      // Switch ke upload mode
       stopCamera();
       setUploadMode(true);
     } else {
-      // Switch ke camera mode
       setUploadMode(false);
       setTimeout(() => {
         startCamera();
@@ -249,7 +256,6 @@ export default function SessionPage() {
     }
   };
 
-  // Calculate crop box style
   const getCropBoxStyle = () => {
     if (!cropStart || !cropEnd) return { display: 'none' };
 
@@ -276,7 +282,6 @@ export default function SessionPage() {
     <main className="session-wrapper">
       <div className="session-card">
         
-        {/* Hidden canvas for capture */}
         <canvas ref={canvasRef} className="hidden-canvas" />
 
         <div className="retro-tape">
@@ -294,15 +299,15 @@ export default function SessionPage() {
         <div className="mode-toggle">
           <button 
             className={`mode-btn ${!uploadMode ? 'active' : ''}`}
-            onClick={() => toggleMode()}
-            disabled={isCapturing || isCropping}
+            onClick={toggleMode}
+            disabled={isCapturing || isCropping || isStartingCamera}
           >
             📷 CAMERA
           </button>
           <button 
             className={`mode-btn ${uploadMode ? 'active' : ''}`}
-            onClick={() => toggleMode()}
-            disabled={isCapturing || isCropping}
+            onClick={toggleMode}
+            disabled={isCapturing || isCropping || isStartingCamera}
           >
             📁 UPLOAD
           </button>
@@ -322,9 +327,10 @@ export default function SessionPage() {
           <span className="instruction-icon">🎞️</span>
         </div>
 
-        {(error || uploadError) && (
+        {/* FIXED: Gunakan cameraError, bukan error */}
+        {(cameraError || uploadError) && (
           <div className="error-message">
-            {error || uploadError}
+            {cameraError || uploadError}
           </div>
         )}
 
@@ -334,7 +340,12 @@ export default function SessionPage() {
               /* Camera Mode */
               <>
                 <div className="camera-container vintage-effect">
-                  <video ref={videoRef} autoPlay playsInline muted />
+                  <video 
+                    ref={videoRef} 
+                    autoPlay 
+                    playsInline 
+                    muted 
+                  />
                   
                   <div className="viewfinder-corner top-left" />
                   <div className="viewfinder-corner top-right" />
@@ -363,9 +374,9 @@ export default function SessionPage() {
                     <button 
                       className="retro-btn" 
                       onClick={startCountdown}
-                      disabled={isCapturing || !isCameraActive}
+                      disabled={isCapturing || !isCameraActive || isStartingCamera}
                     >
-                      {isCapturing ? '...' : 'CAPTURE'}
+                      {isStartingCamera ? 'STARTING...' : (isCapturing ? '...' : 'CAPTURE')}
                     </button>
                   )}
                 </div>
@@ -454,7 +465,7 @@ export default function SessionPage() {
             )}
           </>
         ) : (
-          /* Preview Mode - FIXED: Retake button now works */
+          /* Preview Mode */
           <>
             <div className="camera-container">
               <img src={captured} alt="Captured" />
