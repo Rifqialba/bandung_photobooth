@@ -14,16 +14,17 @@ interface UseCameraReturn {
 }
 
 export const useCamera = (): UseCameraReturn => {
+  // FIXED: Berikan nilai awal null dengan tipe yang tepat
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const playPromiseRef = useRef<Promise<void> | null>(null);
 
   const stopCamera = useCallback(() => {
-    // Stop all tracks
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => {
         track.stop();
@@ -32,11 +33,9 @@ export const useCamera = (): UseCameraReturn => {
       streamRef.current = null;
     }
     
-    // Clear video source
     if (videoRef.current) {
-      // Cancel any pending play promise
       if (playPromiseRef.current) {
-        playPromiseRef.current.catch(() => {}); // Ignore errors
+        playPromiseRef.current.catch(() => {});
         playPromiseRef.current = null;
       }
       
@@ -51,7 +50,6 @@ export const useCamera = (): UseCameraReturn => {
     try {
       setError(null);
       
-      // Stop any existing stream first
       stopCamera();
 
       const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -66,20 +64,18 @@ export const useCamera = (): UseCameraReturn => {
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.muted = true; // Important for autoplay
+        videoRef.current.muted = true;
         videoRef.current.playsInline = true;
         videoRef.current.setAttribute('playsinline', '');
         
-        // Wait for video to be ready
-        await new Promise((resolve) => {
+        await new Promise<void>((resolve) => {
           if (videoRef.current) {
             videoRef.current.onloadedmetadata = () => {
-              resolve(true);
+              resolve();
             };
           }
         });
         
-        // Play with proper promise handling
         const playPromise = videoRef.current.play();
         playPromiseRef.current = playPromise;
         
@@ -89,10 +85,9 @@ export const useCamera = (): UseCameraReturn => {
         }
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Camera access failed';
       setError('Camera access denied. Please use upload option.');
       console.error('Camera error:', err);
-      throw new Error(errorMessage);
+      throw err;
     }
   }, [stopCamera]);
 
@@ -102,7 +97,6 @@ export const useCamera = (): UseCameraReturn => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     
-    // Set canvas size to match video but maintain aspect ratio
     const maxWidth = 800;
     const maxHeight = 600;
     
@@ -125,7 +119,6 @@ export const useCamera = (): UseCameraReturn => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
     
-    // Flip horizontally for selfie view
     ctx.translate(canvas.width, 0);
     ctx.scale(-1, 1);
     ctx.drawImage(video, 0, 0, width, height);
@@ -152,7 +145,6 @@ export const useCamera = (): UseCameraReturn => {
         
         const img = new Image();
         img.onload = () => {
-          // Resize if too large while maintaining aspect ratio
           const maxDimension = 1200;
           let width = img.width;
           let height = img.height;
@@ -203,9 +195,9 @@ export const useCamera = (): UseCameraReturn => {
   }, []);
 
   return {
-    videoRef,
-    fileInputRef,
-    canvasRef,
+    videoRef,      // TypeScript sekarang mengerti ini adalah RefObject<HTMLVideoElement>
+    fileInputRef,  // RefObject<HTMLInputElement>
+    canvasRef,     // RefObject<HTMLCanvasElement>
     startCamera,
     stopCamera,
     capturePhoto,
